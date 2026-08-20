@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>SpendFlow â€” Hitung Spend Per Jam</title>
+<title>SpendFlow &#8212; Hitung Spend Per Jam</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
@@ -1218,7 +1218,7 @@ tr:last-child td{
         </div>
 
         <div class="date" id="currentDate">
-          â€”
+          &#8212;
         </div>
 
       </div>
@@ -1893,7 +1893,7 @@ function renderDetails(
       function showValue(number){
         return Number.isFinite(number)
           ? format(number)
-          : '<span class="empty-value">â€”</span>';
+          : '<span class="empty-value">&#8212;</span>';
       }
 
       const result =
@@ -1904,7 +1904,7 @@ function renderDetails(
         Number.isFinite(result)
           ? Math.round(result)
               .toLocaleString('en-US')
-          : '<span class="empty-value">â€”</span>';
+          : '<span class="empty-value">&#8212;</span>';
 
       const resultHourText =
         Number.isFinite(resultPerHour)
@@ -1915,7 +1915,7 @@ function renderDetails(
             ) +
             Math.round(resultPerHour)
               .toLocaleString('en-US')
-          : '<span class="empty-value">â€”</span>';
+          : '<span class="empty-value">&#8212;</span>';
 
       const resultHourClass =
         resultPerHour > 0
@@ -1932,7 +1932,7 @@ function renderDetails(
                 : ''
             ) +
             format(spendPerHour)
-          : '<span class="empty-value">â€”</span>';
+          : '<span class="empty-value">&#8212;</span>';
 
       const spendHourClass =
         spendPerHour > 0
