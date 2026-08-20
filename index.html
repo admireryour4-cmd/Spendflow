@@ -1,0 +1,2285 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>SpendFlow &#8212; Hitung Spend Per Jam</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
+
+:root{
+  --ink:#15213b;
+  --blue:#3157e8;
+  --orange:#ff6b35;
+  --paper:#f4f6fb;
+  --white:#fff;
+  --line:#dfe4ef;
+  --muted:#78839a;
+  --green:#0ba66b;
+  --red:#e43f5a;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  max-width:100%;
+}
+
+body{
+  background:linear-gradient(
+    145deg,
+    #fbfcfe 0%,
+    #f6f8fc 48%,
+    #f9f7fb 100%
+  );
+  color:var(--ink);
+  font-family:"DM Sans",Arial,sans-serif;
+}
+
+.shell{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:280px minmax(0,1fr);
+}
+
+aside{
+  background:#14213d;
+  color:#fff;
+  padding:32px 24px;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  overflow:hidden;
+}
+
+.logo{
+  font:700 25px "Space Grotesk",sans-serif;
+  position:relative;
+  z-index:5;
+}
+
+.logo i{
+  font-style:normal;
+  color:#ff8558;
+}
+
+.side-title{
+  margin:clamp(65px,13vh,145px) 0 auto;
+  position:relative;
+  z-index:5;
+}
+
+.side-title small{
+  color:#91a0c0;
+  letter-spacing:2px;
+  font-weight:700;
+}
+
+.side-title h1{
+  font:700 41px/1.05 "Space Grotesk";
+  margin:14px 0;
+}
+
+.side-title p{
+  color:#aeb9d0;
+  line-height:1.65;
+  font-size:14px;
+}
+
+.privacy{
+  font-size:11px;
+  color:#8593b1;
+  position:relative;
+  z-index:5;
+}
+
+main{
+  padding:34px clamp(24px,4vw,64px) 50px;
+  max-width:1450px;
+  width:100%;
+  min-width:0;
+  margin:auto;
+}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:28px;
+  gap:18px;
+}
+
+.eyebrow{
+  font-size:12px;
+  color:var(--blue);
+  font-weight:800;
+  letter-spacing:1.7px;
+}
+
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.date{
+  color:var(--muted);
+  font-size:13px;
+  background:#fff;
+  border:1px solid #e7eaf2;
+  padding:10px 14px;
+  border-radius:10px;
+  box-shadow:0 8px 24px rgba(38,55,91,.035);
+}
+
+.mode-switch{
+  display:flex;
+  background:#fff;
+  border:1px solid #e7eaf2;
+  border-radius:10px;
+  padding:3px;
+  box-shadow:0 8px 24px rgba(38,55,91,.035);
+}
+
+.mode-switch button{
+  padding:7px 10px;
+  border-radius:7px;
+  background:transparent;
+  color:#78839a;
+  font-size:11px;
+}
+
+.mode-switch button.active{
+  background:#3157e8;
+  color:#fff;
+}
+
+.workspace{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+.panel{
+  min-width:0;
+  background:#fff;
+  border:1px solid #e7eaf2;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 8px 24px rgba(38,55,91,.035);
+}
+
+.panel-head{
+  padding:18px 20px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.panel-title{
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+
+.number{
+  width:32px;
+  height:32px;
+  border-radius:9px;
+  display:grid;
+  place-items:center;
+  background:#edf0f7;
+  color:#5d6980;
+  font-weight:800;
+}
+
+.latest .number{
+  background:#eaf0ff;
+  color:var(--blue);
+}
+
+.panel h2{
+  font:700 17px "Space Grotesk";
+  margin:0;
+}
+
+.badge{
+  font-size:10px;
+  background:#f0f2f7;
+  color:#738097;
+  padding:6px 8px;
+  border-radius:20px;
+  font-weight:800;
+}
+
+.latest .badge{
+  background:#eaf0ff;
+  color:var(--blue);
+}
+
+.panel-body{
+  padding:19px;
+}
+
+.hint{
+  font-size:12px;
+  color:var(--muted);
+  margin:0 0 10px;
+}
+
+.hint code{
+  color:var(--blue);
+  background:#edf1ff;
+  padding:2px 5px;
+  border-radius:4px;
+}
+
+textarea{
+  width:100%;
+  height:330px;
+  resize:vertical;
+  border:1px solid #e7eaf2;
+  border-radius:11px;
+  background:#fcfcfe;
+  color:#23304c;
+  padding:14px;
+  font:13px/1.7 Consolas,monospace;
+  outline:none;
+  transition:.2s;
+}
+
+textarea:focus{
+  border-color:var(--blue);
+  background:#fff;
+  box-shadow:0 0 0 4px #3157e815;
+}
+
+.toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:20px;
+  gap:15px;
+}
+
+.status{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.buttons{
+  display:flex;
+  gap:10px;
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:12px 18px;
+  font-weight:800;
+  cursor:pointer;
+  font-family:inherit;
+}
+
+button:hover{
+  transform:translateY(-1px);
+}
+
+#reset{
+  background:#fff;
+  color:#68738a;
+  border:1px solid #e7eaf2;
+}
+
+#calculate{
+  background:var(--blue);
+  color:#fff;
+  box-shadow:0 8px 18px #3157e833;
+}
+
+.summary{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,440px));
+  gap:14px;
+  margin-bottom:22px;
+}
+
+.metric{
+  background:#fff;
+  border:1px solid #e7eaf2;
+  border-radius:14px;
+  padding:18px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 8px 24px rgba(38,55,91,.035);
+}
+
+.metric:before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:5px;
+  background:#9eabc2;
+}
+
+.metric.new:before{
+  background:var(--blue);
+}
+
+.metric.hour:before{
+  background:var(--orange);
+}
+
+.metric label{
+  font-size:12px;
+  color:var(--muted);
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+}
+
+.metric strong{
+  display:block;
+  font:700 clamp(24px,3vw,35px) "Space Grotesk";
+  margin-top:7px;
+}
+
+.metric small{
+  color:#9aa4b7;
+}
+
+.status-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-top:13px;
+}
+
+.status-grid strong{
+  font-size:25px;
+  margin:0;
+}
+
+#difference.positive{
+  color:var(--green);
+}
+
+#difference.negative{
+  color:var(--red);
+}
+
+.detail-section{
+  display:none;
+  margin:0 0 22px;
+}
+
+.detail-section.show{
+  display:block;
+}
+
+.detail-heading{
+  font:700 19px "Space Grotesk";
+  margin:0 0 13px;
+}
+
+.account-detail{
+  background:#fff;
+  border:1px solid #e7eaf2;
+  border-radius:16px;
+  overflow:hidden;
+  margin-bottom:14px;
+  box-shadow:0 8px 24px rgba(38,55,91,.035);
+}
+
+.account-detail-head{
+  padding:14px 18px;
+  background:#14213d;
+  color:#fff;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.account-detail-head strong{
+  font:700 16px "Space Grotesk";
+}
+
+.account-detail-head span{
+  font-size:11px;
+  color:#e7eaf2;
+}
+
+.table-wrap{
+  width:100%;
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:950px;
+}
+
+th,
+td{
+  padding:13px 20px;
+  text-align:right;
+  border-bottom:1px solid #edf0f5;
+}
+
+th:first-child,
+td:first-child{
+  text-align:left;
+}
+
+th{
+  font-size:10px;
+  letter-spacing:.8px;
+  color:var(--muted);
+  text-transform:uppercase;
+  background:#fafbfc;
+}
+
+td{
+  font-size:13px;
+  font-weight:700;
+}
+
+tr:last-child td{
+  border-bottom:0;
+}
+
+.campaign-name{
+  max-width:360px;
+  white-space:normal;
+  line-height:1.4;
+  font-weight:600;
+}
+
+.delta-positive{
+  color:var(--green);
+}
+
+.delta-negative{
+  color:var(--red);
+}
+
+.empty-value{
+  color:#a3acbc;
+}
+
+/* DARK MODE */
+
+.dark-mode{
+  --ink:#e8edf7;
+  --line:#303b52;
+  --muted:#9ca8bd;
+  background:#111827;
+  color:#e8edf7;
+}
+
+.dark-mode main{
+  background:linear-gradient(145deg,#111827,#172033);
+}
+
+.dark-mode .panel,
+.dark-mode .metric,
+.dark-mode .account-detail,
+.dark-mode .date,
+.dark-mode #reset,
+.dark-mode .mode-switch{
+  background:#1c2638;
+  border-color:#344057;
+  color:#e8edf7;
+  box-shadow:none;
+}
+
+.dark-mode .panel-head,
+.dark-mode th,
+.dark-mode td{
+  border-color:#303b52;
+}
+
+.dark-mode th{
+  background:#202b3e;
+  color:#9ca8bd;
+}
+
+.dark-mode textarea{
+  background:#141d2c;
+  border-color:#344057;
+  color:#edf2fa;
+}
+
+.dark-mode textarea:focus{
+  background:#182337;
+}
+
+.dark-mode .number,
+.dark-mode .badge{
+  background:#2b3549;
+  color:#bdc7d8;
+}
+
+.dark-mode .hint code{
+  background:#273659;
+  color:#9db3ff;
+}
+
+.dark-mode .mode-switch button{
+  color:#9ca8bd;
+}
+
+.dark-mode .mode-switch button.active{
+  background:#526ff1;
+  color:#fff;
+}
+
+/* KARAKTER PIXEL */
+
+.pixel-plumber{
+  position:absolute;
+  width:95px;
+  height:auto;
+  right:22px;
+  bottom:18px;
+  z-index:2;
+  image-rendering:pixelated;
+  filter:drop-shadow(0 10px 0 rgba(0,0,0,.13));
+  transform-origin:center bottom;
+  animation:plumberJump 4s linear infinite;
+  will-change:transform;
+}
+
+.pixel-block{
+  position:absolute;
+  right:48px;
+  bottom:138px;
+  width:40px;
+  height:40px;
+  z-index:1;
+  background:#b96832;
+  border:4px solid #713719;
+  box-shadow:
+    inset 0 5px #e09a55,
+    inset 0 -5px #8b4724;
+  image-rendering:pixelated;
+  animation:blockBump 4s linear infinite;
+}
+
+.pixel-block:before,
+.pixel-block:after{
+  content:"";
+  position:absolute;
+  background:#713719;
+}
+
+.pixel-block:before{
+  height:4px;
+  left:0;
+  right:0;
+  top:13px;
+  box-shadow:0 13px #713719;
+}
+
+.pixel-block:after{
+  width:4px;
+  height:13px;
+  left:14px;
+  top:0;
+  box-shadow:
+    -9px 13px #713719,
+    9px 13px #713719;
+}
+
+.pixel-coin{
+  position:absolute;
+  right:59px;
+  bottom:178px;
+  width:16px;
+  height:23px;
+  border:4px solid #ffe36a;
+  border-radius:2px;
+  background:#f6b900;
+  box-shadow:
+    inset 3px 0 #fff1a1,
+    inset -3px 0 #d88b00;
+  z-index:2;
+  opacity:0;
+  image-rendering:pixelated;
+  animation:coinPop 4s linear infinite;
+}
+
+.pixel-coin:after{
+  content:"";
+  position:absolute;
+  width:5px;
+  height:5px;
+  background:#fff8bd;
+  right:-10px;
+  top:-8px;
+  opacity:0;
+  box-shadow:
+    8px 8px #fff8bd,
+    -5px 13px #ffd84d;
+  animation:coinSpark 4s steps(1) infinite;
+}
+
+.pixel-shadow{
+  position:absolute;
+  right:21px;
+  bottom:15px;
+  width:78px;
+  height:9px;
+  border-radius:50%;
+  background:rgba(4,10,24,.32);
+  filter:blur(2px);
+  z-index:1;
+  animation:shadowMove 4s linear infinite;
+}
+
+@keyframes plumberJump{
+  0%,13%,82%,100%{
+    transform:translateY(0) scale(1);
+  }
+
+  18%{
+    transform:translateY(2px) scale(1.07,.93);
+  }
+
+  25%{
+    transform:translateY(-14px) scale(.97,1.03);
+  }
+
+  43%{
+    transform:translateY(-54px) scale(1);
+  }
+
+  47%{
+    transform:translateY(-52px) scale(1.03,.97);
+  }
+
+  60%{
+    transform:translateY(-34px) scale(.98,1.02);
+  }
+
+  75%{
+    transform:translateY(2px) scale(1.07,.93);
+  }
+
+  79%{
+    transform:translateY(0) scale(.99,1.01);
+  }
+}
+
+@keyframes blockBump{
+  0%,41%,49%,100%{
+    transform:translateY(0);
+  }
+
+  44%{
+    transform:translateY(-10px);
+  }
+
+  47%{
+    transform:translateY(2px);
+  }
+}
+
+@keyframes coinPop{
+  0%,43%{
+    opacity:0;
+    transform:translateY(0) scaleX(1);
+  }
+
+  44%{
+    opacity:1;
+    transform:translateY(-5px) scaleX(.75);
+  }
+
+  50%{
+    opacity:1;
+    transform:translateY(-48px) scaleX(.22);
+  }
+
+  57%{
+    opacity:1;
+    transform:translateY(-70px) scaleX(1);
+  }
+
+  63%{
+    opacity:1;
+    transform:translateY(-61px) scaleX(.25);
+  }
+
+  70%{
+    opacity:.8;
+    transform:translateY(-36px) scaleX(.8);
+  }
+
+  74%,100%{
+    opacity:0;
+    transform:translateY(-25px) scaleX(.2);
+  }
+}
+
+@keyframes coinSpark{
+  0%,51%,65%,100%{
+    opacity:0;
+  }
+
+  53%,57%,61%{
+    opacity:1;
+  }
+}
+
+@keyframes shadowMove{
+  0%,13%,82%,100%{
+    transform:scaleX(1);
+    opacity:.65;
+  }
+
+  25%{
+    transform:scaleX(.72);
+    opacity:.45;
+  }
+
+  43%{
+    transform:scaleX(.42);
+    opacity:.25;
+  }
+
+  60%{
+    transform:scaleX(.65);
+    opacity:.4;
+  }
+
+  75%{
+    transform:scaleX(1.08);
+    opacity:.7;
+  }
+}
+
+/* TABLET */
+
+@media(max-width:1180px){
+  .shell{
+    grid-template-columns:1fr;
+  }
+
+  aside{
+    min-height:270px;
+    padding:26px 32px;
+  }
+
+  .side-title{
+    margin:34px 0 0;
+    max-width:calc(100% - 230px);
+  }
+
+  .side-title h1{
+    font-size:34px;
+  }
+
+  .privacy{
+    display:none;
+  }
+
+  .pixel-plumber{
+    width:88px;
+    right:60px;
+    bottom:9px;
+  }
+
+  .pixel-block{
+    right:83px;
+    bottom:122px;
+    width:38px;
+    height:38px;
+  }
+
+  .pixel-coin{
+    right:94px;
+    bottom:160px;
+  }
+
+  .pixel-shadow{
+    right:58px;
+    bottom:7px;
+    width:70px;
+  }
+}
+
+@media(max-width:900px){
+  .workspace{
+    grid-template-columns:1fr;
+  }
+}
+
+/* MODE PONSEL */
+
+@media(max-width:700px){
+  aside{
+    min-height:290px;
+    padding:24px 20px;
+  }
+
+  .side-title{
+    max-width:calc(100% - 135px);
+    margin-top:28px;
+  }
+
+  .side-title h1{
+    font-size:29px;
+  }
+
+  .side-title p{
+    font-size:12px;
+  }
+
+  .pixel-plumber{
+    width:70px;
+    right:25px;
+    bottom:9px;
+  }
+
+  .pixel-block{
+    right:42px;
+    bottom:100px;
+    width:34px;
+    height:34px;
+  }
+
+  .pixel-coin{
+    right:51px;
+    bottom:134px;
+    width:14px;
+    height:20px;
+  }
+
+  .pixel-shadow{
+    right:23px;
+    bottom:7px;
+    width:58px;
+  }
+}
+
+@media(max-width:600px){
+  html,
+  body{
+    max-width:100%;
+    overflow-x:hidden;
+  }
+
+  main{
+    padding:20px 12px 34px;
+    min-width:0;
+  }
+
+  header{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .header-actions{
+    width:100%;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:7px;
+  }
+
+  .mode-switch button{
+    padding:7px 8px;
+  }
+
+  .date{
+    padding:9px 10px;
+    font-size:11px;
+  }
+
+  .workspace{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:14px;
+  }
+
+  .panel,
+  .metric,
+  .account-detail{
+    width:100%;
+    min-width:0;
+  }
+
+  .panel-head{
+    padding:15px 14px;
+  }
+
+  .panel-body{
+    padding:14px;
+  }
+
+  .panel h2{
+    font-size:15px;
+  }
+
+  .hint{
+    font-size:11px;
+    line-height:1.5;
+  }
+
+  textarea{
+    height:265px;
+    min-height:220px;
+    font-size:16px;
+    line-height:1.55;
+    padding:12px;
+  }
+
+  .toolbar{
+    width:100%;
+    gap:12px;
+    margin-top:16px;
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .buttons{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr 1.45fr;
+  }
+
+  .buttons button{
+    width:100%;
+    padding:13px 8px;
+    font-size:12px;
+  }
+
+  .status{
+    text-align:left;
+    line-height:1.5;
+  }
+
+  .summary{
+    width:100%;
+    grid-template-columns:minmax(0,1fr);
+    gap:12px;
+  }
+
+  .metric{
+    padding:16px;
+  }
+
+  .status-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+  }
+
+  .status-grid > div{
+    background:rgba(120,131,154,.06);
+    padding:10px;
+    border-radius:9px;
+  }
+
+  .detail-heading{
+    font-size:17px;
+  }
+
+  .account-detail-head{
+    padding:12px 14px;
+    gap:8px;
+  }
+
+  .account-detail-head strong{
+    font-size:14px;
+  }
+
+  .account-detail-head span{
+    font-size:10px;
+    text-align:right;
+  }
+
+  .table-wrap{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+  }
+
+  .table-wrap:after{
+    content:"Geser tabel ke samping →";
+    display:block;
+    position:sticky;
+    left:0;
+    padding:8px 12px;
+    color:var(--muted);
+    font-size:10px;
+    background:rgba(120,131,154,.06);
+  }
+
+  table{
+    min-width:850px;
+  }
+
+  th,
+  td{
+    padding:11px 12px;
+    font-size:11px;
+  }
+
+  .campaign-name{
+    min-width:210px;
+    max-width:240px;
+  }
+}
+
+@media(max-width:430px){
+  aside{
+    min-height:310px;
+  }
+
+  .side-title{
+    max-width:62%;
+  }
+
+  .side-title h1{
+    font-size:26px;
+  }
+
+  .pixel-plumber{
+    right:12px;
+  }
+
+  .pixel-block{
+    right:29px;
+  }
+
+  .pixel-coin{
+    right:38px;
+  }
+
+  .pixel-shadow{
+    right:10px;
+  }
+}
+
+@media(max-width:380px){
+  .buttons{
+    grid-template-columns:1fr;
+  }
+
+  .header-actions{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .mode-switch{
+    width:max-content;
+  }
+
+  .status-grid{
+    gap:8px;
+  }
+
+  .side-title{
+    max-width:58%;
+  }
+
+  .side-title h1{
+    font-size:24px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .pixel-plumber,
+  .pixel-block,
+  .pixel-coin,
+  .pixel-shadow,
+  .pixel-coin:after{
+    animation:none;
+  }
+
+  .pixel-coin{
+    display:none;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="shell">
+
+  <aside>
+
+    <div class="logo">
+      Spend<i>Flow</i>
+    </div>
+
+    <div class="side-title">
+  
+
+      <h1>
+        Hitung spend.<br>
+        Lihat selisih.
+      </h1>
+
+      <p>
+        Masukkan dua data campaign untuk mengetahui jumlah
+        pengeluaran dalam satu jam.
+      </p>
+    </div>
+
+    <svg
+      class="pixel-plumber"
+      viewBox="0 0 16 20"
+      role="img"
+      aria-label="Karakter tukang ledeng pixel"
+    >
+      <g shape-rendering="crispEdges">
+
+        <path
+          fill="#ef3340"
+          d="M5 1h6v1h2v3H3V3h2zM3 9h10v5H3z"
+        />
+
+        <path
+          fill="#7b321f"
+          d="M4 5h3v1H3v3h2V7h2v2h5V8h2V5h-3v1H8V5zM3 16h4v3H1v-2h2zm6 0h4v1h2v2H9z"
+        />
+
+        <path
+          fill="#ffc38b"
+          d="M7 5h4v1h2v2h-1v2H5V9H3V6h4zm-3 9h2v2H3v-1H2v-3h2zm8-2h2v3h-1v1h-2v-2h1z"
+        />
+
+        <path
+          fill="#2268d8"
+          d="M5 10h2v3h2v-3h2v7H5zM3 12h2v4H3zm8 0h2v4h-2z"
+        />
+
+        <path
+          fill="#fff"
+          d="M11 6h1v1h-1zM2 11h2v2H2zm11 0h2v2h-2z"
+        />
+
+        <path
+          fill="#f6c445"
+          d="M6 12h1v1H6zm3 0h1v1H9z"
+        />
+
+        <path
+          fill="#121a2a"
+          d="M7 7h1v1H7zm4 1h2v1h-2z"
+        />
+
+      </g>
+    </svg>
+
+    <i class="pixel-shadow" aria-hidden="true"></i>
+    <i class="pixel-block" aria-hidden="true"></i>
+    <i class="pixel-coin" aria-hidden="true"></i>
+
+    <div class="privacy">
+      ● SATAR1
+    </div>
+
+  </aside>
+
+  <main>
+
+    <header>
+
+      <div class="eyebrow">
+        DASHBOARD
+      </div>
+
+      <div class="header-actions">
+
+        <div class="mode-switch">
+
+          <button id="defaultMode" type="button">
+            ☀ Default
+          </button>
+
+          <button id="darkMode" type="button">
+            ☾ Dark
+          </button>
+
+        </div>
+
+        <div class="date" id="currentDate">
+          &#8212;
+        </div>
+
+      </div>
+
+    </header>
+
+    <section class="workspace">
+
+      <article class="panel">
+
+        <div class="panel-head">
+
+          <div class="panel-title">
+            <span class="number">01</span>
+            <h2>DATA SEBELUM</h2>
+          </div>
+
+          <span class="badge">
+            DATA AWAL
+          </span>
+
+        </div>
+
+        <div class="panel-body">
+
+          <p class="hint">
+           
+          </p>
+
+          <textarea
+            id="previous"
+            placeholder="Tempel Disini"
+          ></textarea>
+
+        </div>
+
+      </article>
+
+      <article class="panel latest">
+
+        <div class="panel-head">
+
+          <div class="panel-title">
+            <span class="number">02</span>
+            <h2>TERBARU</h2>
+          </div>
+
+          <span class="badge">
+            UPDATE
+          </span>
+
+        </div>
+
+        <div class="panel-body">
+
+          <p class="hint">
+       
+          </p>
+
+          <textarea
+            id="current"
+            placeholder="Tempel Disini"
+          ></textarea>
+
+        </div>
+
+      </article>
+
+    </section>
+
+    <div class="toolbar">
+
+      <div class="status" id="status">
+            *PERHATIKAN TANDA DAN WARNA.
+      </div>
+
+      <div class="buttons">
+
+        <button id="reset" type="button">
+          CLEAR
+        </button>
+
+        <button id="calculate" type="button">
+          START →
+        </button>
+
+      </div>
+
+    </div>
+
+    <div style="margin-top:30px">
+
+      <section class="summary">
+
+        <div class="metric hour">
+
+          <label>
+            Total Spend/Jam
+          </label>
+
+          <strong id="difference">
+            0.00
+          </strong>
+
+          <small>
+            *PASTIKAN BALANCE
+          </small>
+
+        </div>
+
+        <div class="metric new">
+
+          <label>
+            Status Campaign
+          </label>
+
+          <div class="status-grid">
+
+            <div>
+              <strong
+                id="activeCount"
+                style="color:var(--green)"
+              >0</strong>
+
+              <small>ACTIVE</small>
+            </div>
+
+            <div>
+              <strong
+                id="reviewCount"
+                style="color:#d6a000"
+              >0</strong>
+
+              <small>IN REVIEW</small>
+            </div>
+
+            <div>
+              <strong
+                id="offCount"
+                style="color:var(--red)"
+              >0</strong>
+
+              <small>OFF</small>
+            </div>
+
+            <div>
+              <strong
+                id="disabledCount"
+                style="color:#7b879d"
+              >0</strong>
+
+              <small>DISABLED</small>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <section
+        class="detail-section"
+        id="detailSection"
+      >
+
+        <h2 class="detail-heading">
+          Rincian Setiap Akun
+        </h2>
+
+        <div id="detailContent"></div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const previousInput = $('previous');
+const currentInput = $('current');
+const difference = $('difference');
+const activeCount = $('activeCount');
+const reviewCount = $('reviewCount');
+const offCount = $('offCount');
+const disabledCount = $('disabledCount');
+const statusEl = $('status');
+
+$('currentDate').textContent =
+  new Intl.DateTimeFormat(
+    'id-ID',
+    {
+      day:'2-digit',
+      month:'long',
+      year:'numeric'
+    }
+  ).format(new Date());
+
+function setTheme(mode){
+  const dark = mode === 'dark';
+
+  document.body.classList.toggle(
+    'dark-mode',
+    dark
+  );
+
+  $('darkMode').classList.toggle(
+    'active',
+    dark
+  );
+
+  $('defaultMode').classList.toggle(
+    'active',
+    !dark
+  );
+
+  try{
+    localStorage.setItem(
+      'spendflow-theme',
+      mode
+    );
+  }
+  catch(error){}
+}
+
+let savedTheme = 'default';
+
+try{
+  savedTheme =
+    localStorage.getItem('spendflow-theme') ||
+    'default';
+}
+catch(error){}
+
+setTheme(savedTheme);
+
+$('darkMode').addEventListener(
+  'click',
+  () => setTheme('dark')
+);
+
+$('defaultMode').addEventListener(
+  'click',
+  () => setTheme('default')
+);
+
+function parseNumber(value){
+  let text = String(value || '')
+    .trim()
+    .replace(/[$\s]/g,'');
+
+  if(!text){
+    return NaN;
+  }
+
+  if(
+    text.includes(',') &&
+    text.includes('.')
+  ){
+    text =
+      text.lastIndexOf(',') >
+      text.lastIndexOf('.')
+        ? text
+            .replace(/\./g,'')
+            .replace(',','.')
+        : text.replace(/,/g,'');
+  }
+  else if(text.includes(',')){
+    const parts = text.split(',');
+
+    text =
+      parts.length === 2 &&
+      parts[1].length <= 2
+        ? text.replace(',','.')
+        : text.replace(/,/g,'');
+  }
+
+  return Number(
+    text.replace(/[^0-9.-]/g,'')
+  );
+}
+
+function readCampaignStatus(line){
+  if(/\bdisabled\b/i.test(line)){
+    return 'disabled';
+  }
+
+  if(/\boff\b/i.test(line)){
+    return 'off';
+  }
+
+  if(
+    /\bin\s*review\b|\breview\b/i
+      .test(line)
+  ){
+    return 'review';
+  }
+
+  return null;
+}
+
+function parseCampaignBlocks(text){
+  const lines = text
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean);
+
+  const records = [];
+  let current = null;
+
+  function finishCurrent(){
+    if(current){
+      records.push(current);
+    }
+  }
+
+  function applyStatus(status){
+    if(!status || !current){
+      return;
+    }
+
+    if(status === 'disabled'){
+      current.status = 'disabled';
+    }
+    else if(
+      current.status !== 'disabled' &&
+      status === 'off'
+    ){
+      current.status = 'off';
+    }
+    else if(
+      current.status === 'active' &&
+      status === 'review'
+    ){
+      current.status = 'review';
+    }
+  }
+
+  for(const line of lines){
+    const accountMatch =
+      line.match(/\((\d{3,})\)/);
+
+    if(accountMatch){
+      finishCurrent();
+
+      current = {
+        account:accountMatch[1],
+        code:null,
+        name:line,
+        status:
+          readCampaignStatus(line) ||
+          'active',
+        result:null,
+        spend:null,
+        cpr:null,
+        cpm:null,
+        cpc:null
+      };
+
+      continue;
+    }
+
+    if(!current){
+      continue;
+    }
+
+    applyStatus(
+      readCampaignStatus(line)
+    );
+
+    const codeMatch =
+      line.match(/\b(C\d+)\b/i);
+
+    if(codeMatch){
+      current.code =
+        codeMatch[1].toUpperCase();
+    }
+
+    let match;
+
+    if(
+      (
+        match = line.match(
+          /^RESULT\s*:\s*([\d.,-]+)\s*$/i
+        )
+      )
+    ){
+      current.result =
+        parseNumber(match[1]);
+    }
+    else if(
+      (
+        match = line.match(
+          /^SPEND\s*:\s*\$?\s*([\d.,-]+)\s*$/i
+        )
+      )
+    ){
+      current.spend =
+        parseNumber(match[1]);
+    }
+    else if(
+      (
+        match = line.match(
+          /^CPR\s*:\s*\$?\s*([\d.,-]+)\s*$/i
+        )
+      )
+    ){
+      current.cpr =
+        parseNumber(match[1]);
+    }
+    else if(
+      (
+        match = line.match(
+          /^CPM\s*:\s*\$?\s*([\d.,-]+)\s*$/i
+        )
+      )
+    ){
+      current.cpm =
+        parseNumber(match[1]);
+    }
+    else if(
+      (
+        match = line.match(
+          /^CPC\s*:\s*\$?\s*([\d.,-]+)\s*$/i
+        )
+      )
+    ){
+      current.cpc =
+        parseNumber(match[1]);
+    }
+  }
+
+  finishCurrent();
+
+  return records;
+}
+
+function escapeHTML(value){
+  return String(value).replace(
+    /[&<>'"]/g,
+    character => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      "'":'&#39;',
+      '"':'&quot;'
+    })[character]
+  );
+}
+
+function format(value){
+  return value.toLocaleString(
+    'en-US',
+    {
+      minimumFractionDigits:2,
+      maximumFractionDigits:2
+    }
+  );
+}
+
+function getRecordKey(item){
+  return (
+    item.account +
+    '|' +
+    (item.code || 'MAIN')
+  );
+}
+
+function getAccountStatus(
+  account,
+  oldRecords,
+  newRecords
+){
+  const latest = newRecords.filter(
+    item => item.account === account
+  );
+
+  const selected = latest.length
+    ? latest
+    : oldRecords.filter(
+        item => item.account === account
+      );
+
+  if(
+    selected.some(
+      item => item.status === 'disabled'
+    )
+  ){
+    return 'disabled';
+  }
+
+  if(
+    selected.some(
+      item => item.status === 'off'
+    )
+  ){
+    return 'off';
+  }
+
+  if(
+    selected.some(
+      item => item.status === 'review'
+    )
+  ){
+    return 'review';
+  }
+
+  return 'active';
+}
+
+function renderDetails(
+  oldRecords,
+  newRecords,
+  accounts
+){
+  const oldMap = new Map(
+    oldRecords.map(
+      item => [getRecordKey(item),item]
+    )
+  );
+
+  const newMap = new Map(
+    newRecords.map(
+      item => [getRecordKey(item),item]
+    )
+  );
+
+  let html = '';
+
+  for(const account of accounts){
+    const keys = [
+      ...new Set(
+        [
+          ...oldMap.keys(),
+          ...newMap.keys()
+        ].filter(
+          key => key.startsWith(
+            account + '|'
+          )
+        )
+      )
+    ];
+
+    if(!keys.length){
+      continue;
+    }
+
+    const accountRecords = keys.map(
+      key =>
+        newMap.get(key) ||
+        oldMap.get(key)
+    );
+
+    let accountStatus = 'active';
+
+    if(
+      accountRecords.some(
+        item =>
+          item?.status === 'disabled'
+      )
+    ){
+      accountStatus = 'disabled';
+    }
+    else if(
+      accountRecords.some(
+        item => item?.status === 'off'
+      )
+    ){
+      accountStatus = 'off';
+    }
+    else if(
+      accountRecords.some(
+        item =>
+          item?.status === 'review'
+      )
+    ){
+      accountStatus = 'review';
+    }
+
+    let headerStyle = '';
+    let statusLabel = '';
+
+    if(accountStatus === 'disabled'){
+      headerStyle =
+        'background:#7b879d;';
+
+      statusLabel = 'DISABLED';
+    }
+    else if(accountStatus === 'off'){
+      headerStyle =
+        'background:var(--red);';
+
+      statusLabel = 'OFF';
+    }
+    else if(
+      accountStatus === 'review'
+    ){
+      headerStyle =
+        'background:#d6a000;' +
+        'color:#1f2937;';
+
+      statusLabel = 'IN REVIEW';
+    }
+
+    let tableBody = '';
+
+    for(const key of keys){
+      const oldItem = oldMap.get(key);
+      const newItem = newMap.get(key);
+      const item = newItem || oldItem;
+
+      const hasPair =
+        Boolean(oldItem && newItem);
+
+      const oldSpend =
+        Number.isFinite(oldItem?.spend)
+          ? oldItem.spend
+          : null;
+
+      const newSpend =
+        Number.isFinite(newItem?.spend)
+          ? newItem.spend
+          : null;
+
+      const oldResult =
+        Number.isFinite(oldItem?.result)
+          ? oldItem.result
+          : null;
+
+      const newResult =
+        Number.isFinite(newItem?.result)
+          ? newItem.result
+          : null;
+
+      /*
+        Jika data terbaru mempunyai SPEND/RESULT,
+        tetapi data sebelumnya tidak ada atau nilainya
+        kosong, seluruh nilai terbaru dianggap sebagai
+        hasil pada jam ini.
+
+        Data yang hanya ada pada laporan sebelumnya tidak
+        dibuat minus karena belum memiliki data terbaru.
+      */
+      const spendPerHour =
+        newSpend !== null
+          ? (
+              oldSpend !== null
+                ? newSpend - oldSpend
+                : newSpend
+            )
+          : null;
+
+      const resultPerHour =
+        newResult !== null
+          ? (
+              oldResult !== null
+                ? newResult - oldResult
+                : newResult
+            )
+          : null;
+
+      const crh =
+        Number.isFinite(resultPerHour) &&
+        resultPerHour > 0 &&
+        Number.isFinite(spendPerHour)
+          ? spendPerHour / resultPerHour
+          : null;
+
+      function showValue(number){
+        return Number.isFinite(number)
+          ? format(number)
+          : '<span class="empty-value">&#8212;</span>';
+      }
+
+      const result =
+        newItem?.result ??
+        oldItem?.result;
+
+      const resultText =
+        Number.isFinite(result)
+          ? Math.round(result)
+              .toLocaleString('en-US')
+          : '<span class="empty-value">&#8212;</span>';
+
+      const resultHourText =
+        Number.isFinite(resultPerHour)
+          ? (
+              resultPerHour > 0
+                ? '+'
+                : ''
+            ) +
+            Math.round(resultPerHour)
+              .toLocaleString('en-US')
+          : '<span class="empty-value">&#8212;</span>';
+
+      const resultHourClass =
+        resultPerHour > 0
+          ? 'delta-positive'
+          : resultPerHour < 0
+            ? 'delta-negative'
+            : '';
+
+      const spendHourText =
+        Number.isFinite(spendPerHour)
+          ? (
+              spendPerHour > 0
+                ? '+'
+                : ''
+            ) +
+            format(spendPerHour)
+          : '<span class="empty-value">&#8212;</span>';
+
+      const spendHourClass =
+        spendPerHour > 0
+          ? 'delta-positive'
+          : spendPerHour < 0
+            ? 'delta-negative'
+            : '';
+
+      const displayName =
+        item.name +
+        (
+          item.code
+            ? ' (' + item.code + ')'
+            : ''
+        );
+
+      const crhStyle =
+        Number.isFinite(crh) &&
+        crh > 5
+          ? 'color:var(--red);font-weight:800;'
+          : '';
+
+      tableBody += `
+        <tr>
+
+          <td class="campaign-name">
+            ${escapeHTML(displayName)}
+          </td>
+
+          <td>
+            ${resultText}
+          </td>
+
+          <td class="${resultHourClass}">
+            ${resultHourText}
+          </td>
+
+          <td>
+            ${showValue(oldSpend)}
+          </td>
+
+          <td>
+            ${showValue(newSpend)}
+          </td>
+
+          <td class="${spendHourClass}">
+            ${spendHourText}
+          </td>
+
+          <td style="${crhStyle}">
+            ${showValue(crh)}
+          </td>
+
+          <td>
+            ${showValue(
+              newItem?.cpr ??
+              oldItem?.cpr
+            )}
+          </td>
+
+          <td>
+            ${showValue(
+              newItem?.cpm ??
+              oldItem?.cpm
+            )}
+          </td>
+
+          <td>
+            ${showValue(
+              newItem?.cpc ??
+              oldItem?.cpc
+            )}
+          </td>
+
+        </tr>
+      `;
+    }
+
+    html += `
+      <article class="account-detail">
+
+        <div
+          class="account-detail-head"
+          style="${headerStyle}"
+        >
+
+          <strong>
+            Akun (${account})
+          </strong>
+
+          <span>
+            ${
+              statusLabel
+                ? statusLabel + ' • '
+                : ''
+            }
+
+            ${keys.length} campaign
+          </span>
+
+        </div>
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Campaign</th>
+                <th>Result</th>
+                <th>Result/Jam</th>
+                <th>Spend Lama</th>
+                <th>Spend Baru</th>
+                <th>Spend/Jam</th>
+                <th>CR/H</th>
+                <th>CPR</th>
+                <th>CPM</th>
+                <th>CPC</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${tableBody}
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </article>
+    `;
+  }
+
+  $('detailContent').innerHTML = html;
+
+  $('detailSection').classList.toggle(
+    'show',
+    Boolean(html)
+  );
+}
+
+function calculate(){
+  const oldRecords =
+    parseCampaignBlocks(
+      previousInput.value
+    );
+
+  const newRecords =
+    parseCampaignBlocks(
+      currentInput.value
+    );
+
+  const statusRecords =
+    newRecords.length
+      ? newRecords
+      : oldRecords;
+
+  const statusRank = {
+    active:0,
+    review:1,
+    off:2,
+    disabled:3
+  };
+
+  const accounts = [
+    ...new Set([
+      ...oldRecords.map(
+        item => item.account
+      ),
+      ...newRecords.map(
+        item => item.account
+      )
+    ])
+  ].sort((accountA,accountB) => {
+    const statusA =
+      getAccountStatus(
+        accountA,
+        oldRecords,
+        newRecords
+      );
+
+    const statusB =
+      getAccountStatus(
+        accountB,
+        oldRecords,
+        newRecords
+      );
+
+    return (
+      statusRank[statusA] -
+      statusRank[statusB]
+    ) ||
+    accountA.localeCompare(
+      accountB,
+      undefined,
+      {numeric:true}
+    );
+  });
+
+  activeCount.textContent =
+    statusRecords.filter(
+      item => item.status === 'active'
+    ).length;
+
+  reviewCount.textContent =
+    statusRecords.filter(
+      item => item.status === 'review'
+    ).length;
+
+  offCount.textContent =
+    statusRecords.filter(
+      item => item.status === 'off'
+    ).length;
+
+  disabledCount.textContent =
+    statusRecords.filter(
+      item => item.status === 'disabled'
+    ).length;
+
+  if(!accounts.length){
+    statusEl.textContent =
+      'Data tidak terbaca. Pastikan ' +
+      'ada nomor akun seperti (0105) ' +
+      'dan baris SPEND : 25.50.';
+
+    $('detailSection')
+      .classList
+      .remove('show');
+
+    difference.textContent = '0.00';
+    difference.className = '';
+
+    return;
+  }
+
+  renderDetails(
+    oldRecords,
+    newRecords,
+    accounts
+  );
+
+  const oldMap = new Map(
+    oldRecords.map(
+      item => [
+        getRecordKey(item),
+        item
+      ]
+    )
+  );
+
+  const newMap = new Map(
+    newRecords.map(
+      item => [
+        getRecordKey(item),
+        item
+      ]
+    )
+  );
+
+  const matchedKeys = [
+    ...oldMap.keys()
+  ].filter(
+    key => newMap.has(key)
+  );
+
+  const newOnlyKeys = [
+    ...newMap.keys()
+  ].filter(
+    key => !oldMap.has(key)
+  );
+
+  const totalDifference =
+    [...newMap.keys()].reduce(
+      (total,key) => {
+        const oldSpend =
+          oldMap.get(key)?.spend;
+
+        const newSpend =
+          newMap.get(key)?.spend;
+
+        if(Number.isFinite(newSpend)){
+          return total + (
+            Number.isFinite(oldSpend)
+              ? newSpend - oldSpend
+              : newSpend
+          );
+        }
+
+        return total;
+      },
+      0
+    );
+
+  difference.textContent =
+    (
+      totalDifference > 0
+        ? '+'
+        : ''
+    ) +
+    format(totalDifference);
+
+  difference.className =
+    totalDifference > 0
+      ? 'positive'
+      : totalDifference < 0
+        ? 'negative'
+        : '';
+
+  statusEl.textContent =
+    `Berhasil membuat rincian ` +
+    `${accounts.length} akun. ` +
+    `${matchedKeys.length} campaign ` +
+    `dihitung sebagai pasangan dan ` +
+    `${newOnlyKeys.length} campaign baru ` +
+    `dihitung seluruh nilainya.`;
+}
+
+$('calculate').addEventListener(
+  'click',
+  calculate
+);
+
+$('reset').addEventListener(
+  'click',
+  () => {
+    previousInput.value = '';
+    currentInput.value = '';
+
+    difference.textContent = '0.00';
+    difference.className = '';
+
+    activeCount.textContent = '0';
+    reviewCount.textContent = '0';
+    offCount.textContent = '0';
+    disabledCount.textContent = '0';
+
+    $('detailContent').innerHTML = '';
+
+    $('detailSection')
+      .classList
+      .remove('show');
+
+    statusEl.textContent =
+      'Semua data telah dibersihkan.';
+  }
+);
+</script>
+
+</body>
+</html>
