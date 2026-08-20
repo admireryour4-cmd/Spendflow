@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>SpendFlow — Hitung Spend Per Jam</title>
+<title>SpendFlow â€” Hitung Spend Per Jam</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
@@ -1016,7 +1016,7 @@ tr:last-child td{
   }
 
   .table-wrap:after{
-    content:"Geser tabel ke samping →";
+    content:"Geser tabel ke samping â†’";
     display:block;
     position:sticky;
     left:0;
@@ -1134,7 +1134,8 @@ tr:last-child td{
       </h1>
 
       <p>
-        ここから1時間あたりの利用額を確認しろよ、クソ野郎。
+        Masukkan dua data campaign untuk mengetahui jumlah
+        pengeluaran dalam satu jam.
       </p>
     </div>
 
@@ -1189,7 +1190,7 @@ tr:last-child td{
     <i class="pixel-coin" aria-hidden="true"></i>
 
     <div class="privacy">
-      ● SATAR1
+      â— SATAR1
     </div>
 
   </aside>
@@ -1207,17 +1208,17 @@ tr:last-child td{
         <div class="mode-switch">
 
           <button id="defaultMode" type="button">
-            ☀ Default
+            â˜€ Default
           </button>
 
           <button id="darkMode" type="button">
-            ☾ Dark
+            â˜¾ Dark
           </button>
 
         </div>
 
         <div class="date" id="currentDate">
-          —
+          â€”
         </div>
 
       </div>
@@ -1301,7 +1302,7 @@ tr:last-child td{
         </button>
 
         <button id="calculate" type="button">
-          START →
+          START â†’
         </button>
 
       </div>
@@ -1855,18 +1856,31 @@ function renderDetails(
           ? newItem.result
           : null;
 
+      /*
+        Jika data terbaru mempunyai SPEND/RESULT,
+        tetapi data sebelumnya tidak ada atau nilainya
+        kosong, seluruh nilai terbaru dianggap sebagai
+        hasil pada jam ini.
+
+        Data yang hanya ada pada laporan sebelumnya tidak
+        dibuat minus karena belum memiliki data terbaru.
+      */
       const spendPerHour =
-        hasPair &&
-        oldSpend !== null &&
         newSpend !== null
-          ? newSpend - oldSpend
+          ? (
+              oldSpend !== null
+                ? newSpend - oldSpend
+                : newSpend
+            )
           : null;
 
       const resultPerHour =
-        hasPair &&
-        oldResult !== null &&
         newResult !== null
-          ? newResult - oldResult
+          ? (
+              oldResult !== null
+                ? newResult - oldResult
+                : newResult
+            )
           : null;
 
       const crh =
@@ -1879,7 +1893,7 @@ function renderDetails(
       function showValue(number){
         return Number.isFinite(number)
           ? format(number)
-          : '<span class="empty-value">—</span>';
+          : '<span class="empty-value">â€”</span>';
       }
 
       const result =
@@ -1890,7 +1904,7 @@ function renderDetails(
         Number.isFinite(result)
           ? Math.round(result)
               .toLocaleString('en-US')
-          : '<span class="empty-value">—</span>';
+          : '<span class="empty-value">â€”</span>';
 
       const resultHourText =
         Number.isFinite(resultPerHour)
@@ -1901,7 +1915,7 @@ function renderDetails(
             ) +
             Math.round(resultPerHour)
               .toLocaleString('en-US')
-          : '<span class="empty-value">—</span>';
+          : '<span class="empty-value">â€”</span>';
 
       const resultHourClass =
         resultPerHour > 0
@@ -1918,7 +1932,7 @@ function renderDetails(
                 : ''
             ) +
             format(spendPerHour)
-          : '<span class="empty-value">—</span>';
+          : '<span class="empty-value">â€”</span>';
 
       const spendHourClass =
         spendPerHour > 0
@@ -2012,7 +2026,7 @@ function renderDetails(
           <span>
             ${
               statusLabel
-                ? statusLabel + ' • '
+                ? statusLabel + ' â€¢ '
                 : ''
             }
 
@@ -2184,8 +2198,14 @@ function calculate(){
     key => newMap.has(key)
   );
 
+  const newOnlyKeys = [
+    ...newMap.keys()
+  ].filter(
+    key => !oldMap.has(key)
+  );
+
   const totalDifference =
-    matchedKeys.reduce(
+    [...newMap.keys()].reduce(
       (total,key) => {
         const oldSpend =
           oldMap.get(key)?.spend;
@@ -2193,13 +2213,11 @@ function calculate(){
         const newSpend =
           newMap.get(key)?.spend;
 
-        if(
-          Number.isFinite(oldSpend) &&
-          Number.isFinite(newSpend)
-        ){
-          return (
-            total +
-            (newSpend - oldSpend)
+        if(Number.isFinite(newSpend)){
+          return total + (
+            Number.isFinite(oldSpend)
+              ? newSpend - oldSpend
+              : newSpend
           );
         }
 
@@ -2227,7 +2245,9 @@ function calculate(){
     `Berhasil membuat rincian ` +
     `${accounts.length} akun. ` +
     `${matchedKeys.length} campaign ` +
-    `dihitung sebagai pasangan.`;
+    `dihitung sebagai pasangan dan ` +
+    `${newOnlyKeys.length} campaign baru ` +
+    `dihitung seluruh nilainya.`;
 }
 
 $('calculate').addEventListener(
