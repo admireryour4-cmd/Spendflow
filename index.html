@@ -3150,6 +3150,35 @@ body.dark-mode .auth-button.logged-in{
   }
 }
 
+#securityNotice{
+  position:fixed;
+  left:50%;
+  bottom:max(24px,env(safe-area-inset-bottom));
+  z-index:100000;
+  max-width:calc(100vw - 32px);
+  transform:translate(-50%,18px);
+  box-sizing:border-box;
+  padding:12px 17px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:13px;
+  background:rgba(15,23,42,.96);
+  color:#fff;
+  box-shadow:0 14px 40px rgba(2,6,23,.34);
+  font:800 11px/1.4 Arial,sans-serif;
+  letter-spacing:.04em;
+  text-align:center;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .2s ease,transform .2s ease,visibility .2s ease;
+}
+
+#securityNotice.show{
+  transform:translate(-50%,0);
+  opacity:1;
+  visibility:visible;
+}
+
 </style>
 </head>
 
@@ -3618,6 +3647,10 @@ body.dark-mode .auth-button.logged-in{
 <button id="backToTop" type="button" aria-label="Kembali ke atas">
   ↑
 </button>
+
+<div id="securityNotice" role="status" aria-live="polite">
+  AKSES TERSEBUT DINONAKTIFKAN
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -5904,6 +5937,51 @@ $('reset').addEventListener(
 
     statusEl.textContent =
       'Semua data telah dibersihkan.';
+  }
+);
+
+/* BLOKIR SHORTCUT SOURCE, SIMPAN, DEVTOOLS, DAN KLIK KANAN */
+let securityNoticeTimer;
+
+function showSecurityNotice(){
+  const notice = $('securityNotice');
+
+  notice.classList.add('show');
+  clearTimeout(securityNoticeTimer);
+
+  securityNoticeTimer = setTimeout(
+    () => notice.classList.remove('show'),
+    1800
+  );
+}
+
+document.addEventListener(
+  'keydown',
+  event => {
+    const key = event.key.toLowerCase();
+    const blocked =
+      (event.ctrlKey && ['u','s'].includes(key)) ||
+      event.key === 'F12' ||
+      (
+        event.ctrlKey &&
+        event.shiftKey &&
+        ['i','j','c'].includes(key)
+      );
+
+    if(blocked){
+      event.preventDefault();
+      event.stopPropagation();
+      showSecurityNotice();
+    }
+  },
+  {capture:true}
+);
+
+document.addEventListener(
+  'contextmenu',
+  event => {
+    event.preventDefault();
+    showSecurityNotice();
   }
 );
 
