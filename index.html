@@ -2951,6 +2951,205 @@ tbody tr:hover{
   }
 }
 
+.auth-widget{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.auth-widget[hidden]{
+  display:none !important;
+}
+
+.auth-button,
+.auth-logout{
+  min-height:42px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--card);
+  color:var(--text);
+  padding:0 14px;
+  font:800 11px/1 Arial,sans-serif;
+  letter-spacing:.04em;
+  cursor:pointer;
+}
+
+.auth-button{
+  max-width:210px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.auth-button.logged-in{
+  border-color:rgba(16,185,129,.45);
+  color:#047857;
+}
+
+.auth-logout{
+  display:none;
+  color:#e11d48;
+}
+
+.auth-widget.logged-in .auth-logout{
+  display:block;
+}
+
+.auth-overlay{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:none;
+  place-items:center;
+  padding:20px;
+  background:rgba(7,12,24,.76);
+  backdrop-filter:blur(12px);
+}
+
+.auth-overlay.show{
+  display:grid;
+}
+
+.auth-card{
+  width:min(430px,100%);
+  border:1px solid rgba(148,163,184,.28);
+  border-radius:24px;
+  background:#fff;
+  color:#0f172a;
+  box-shadow:0 28px 80px rgba(2,6,23,.35);
+  overflow:hidden;
+}
+
+.auth-card-head{
+  padding:26px 26px 18px;
+  background:linear-gradient(135deg,#172554,#312e81);
+  color:#fff;
+}
+
+.auth-card-head small{
+  display:block;
+  margin-bottom:8px;
+  color:#93c5fd;
+  font:800 10px/1 Arial,sans-serif;
+  letter-spacing:.16em;
+}
+
+.auth-card-head h2{
+  margin:0 0 8px;
+  font-size:24px;
+}
+
+.auth-card-head p{
+  margin:0;
+  color:#cbd5e1;
+  font-size:12px;
+  line-height:1.6;
+}
+
+.auth-form{
+  display:grid;
+  gap:14px;
+  padding:24px 26px 26px;
+}
+
+.auth-form label{
+  display:grid;
+  gap:7px;
+  color:#475569;
+  font:800 10px/1 Arial,sans-serif;
+  letter-spacing:.08em;
+}
+
+.auth-form input{
+  width:100%;
+  box-sizing:border-box;
+  min-height:46px;
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+  background:#f8fafc;
+  color:#0f172a;
+  padding:0 13px;
+  font:600 14px Arial,sans-serif;
+  outline:none;
+}
+
+.auth-form input:focus{
+  border-color:#4f46e5;
+  box-shadow:0 0 0 3px rgba(79,70,229,.13);
+}
+
+.auth-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.auth-actions button,
+.guest-button{
+  min-height:46px;
+  border:0;
+  border-radius:12px;
+  padding:0 12px;
+  font:900 11px Arial,sans-serif;
+  cursor:pointer;
+}
+
+#authLogin{
+  background:#4f46e5;
+  color:#fff;
+}
+
+#authRegister{
+  background:#e0e7ff;
+  color:#3730a3;
+}
+
+.guest-button{
+  width:100%;
+  border:1px solid #cbd5e1;
+  background:#fff;
+  color:#475569;
+}
+
+.auth-message{
+  min-height:18px;
+  margin:0;
+  color:#64748b;
+  font-size:11px;
+  line-height:1.5;
+}
+
+.auth-message.error{color:#dc2626}
+.auth-message.success{color:#059669}
+
+body.dark-mode .auth-button,
+body.dark-mode .auth-logout{
+  background:#172033;
+}
+
+body.dark-mode .auth-button.logged-in{
+  color:#34d399;
+}
+
+@media(max-width:720px){
+  .auth-widget{
+    width:100%;
+    order:3;
+  }
+
+  .auth-button{
+    max-width:none;
+    flex:1;
+  }
+
+  .auth-card-head,
+  .auth-form{
+    padding-left:20px;
+    padding-right:20px;
+  }
+}
+
 </style>
 </head>
 
@@ -3045,6 +3244,16 @@ tbody tr:hover{
       </div>
 
       <div class="header-actions">
+
+        <div class="auth-widget" id="authWidget" hidden>
+          <button class="auth-button" id="openAuth" type="button">
+            MASUK / DAFTAR
+          </button>
+
+          <button class="auth-logout" id="authLogout" type="button">
+            KELUAR
+          </button>
+        </div>
 
         <div class="mode-switch">
 
@@ -3266,7 +3475,7 @@ tbody tr:hover{
           <div class="history-title">
             <div>
               <small>DATA TERSIMPAN</small>
-              <h2>Riwayat Spend</h2>
+              <h2>Riwayat Spend Update</h2>
             </div>
 
             <button id="toggleHistory" type="button">
@@ -3369,10 +3578,48 @@ tbody tr:hover{
 
 </div>
 
+<div class="auth-overlay" id="authOverlay" aria-hidden="true">
+  <section class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="auth-card-head">
+      <small>SPENDFLOW CLOUD</small>
+      <h2 id="authTitle">Masuk ke akun</h2>
+      <p>
+        Sinkronkan laporan dengan aman agar dapat dibuka dari HP dan komputer.
+      </p>
+    </div>
+
+    <form class="auth-form" id="authForm">
+      <label>
+        EMAIL
+        <input id="authEmail" type="email" autocomplete="email" placeholder="nama@email.com" required>
+      </label>
+
+      <label>
+        PASSWORD
+        <input id="authPassword" type="password" autocomplete="current-password" placeholder="Minimal 6 karakter" minlength="6" required>
+      </label>
+
+      <p class="auth-message" id="authMessage">
+        Gunakan email yang dapat menerima tautan verifikasi.
+      </p>
+
+      <div class="auth-actions">
+        <button id="authLogin" type="submit">MASUK</button>
+        <button id="authRegister" type="button">DAFTAR BARU</button>
+      </div>
+
+      <button class="guest-button" id="continueGuest" type="button">
+        LANJUT TANPA LOGIN
+      </button>
+    </form>
+  </section>
+</div>
+
 <button id="backToTop" type="button" aria-label="Kembali ke atas">
   ↑
 </button>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const $ = id => document.getElementById(id);
 
@@ -3415,6 +3662,418 @@ const INPUT_STORAGE_KEY =
 let lastCalculation = null;
 let lastDetailData = null;
 let inputSaveTimer = null;
+let cloudSaveTimer = null;
+let currentSpendflowUser = null;
+let applyingCloudData = false;
+
+const SUPABASE_URL =
+  'https://yuicgqjzsnwnewwrsuas.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY =
+  'sb_publishable_APdJXqf70fPXcK8-wIWubg_uypWchO5';
+const LOGIN_ENABLED = false;
+const GUEST_MODE_KEY =
+  'spendflow_guest_mode_v1';
+const CLOUD_REVISION_KEY =
+  'spendflow_cloud_revision_v1';
+const LAST_USER_KEY =
+  'spendflow_last_user_v1';
+
+const authOverlay = $('authOverlay');
+const authWidget = $('authWidget');
+const openAuthButton = $('openAuth');
+const authLogoutButton = $('authLogout');
+const authForm = $('authForm');
+const authEmail = $('authEmail');
+const authPassword = $('authPassword');
+const authMessage = $('authMessage');
+
+const spendflowSupabase =
+  window.supabase?.createClient
+    ? window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+      )
+    : null;
+
+function setAuthMessage(message,type = ''){
+  authMessage.textContent = message;
+  authMessage.className =
+    `auth-message ${type}`.trim();
+}
+
+function showAuth(){
+  authOverlay.classList.add('show');
+  authOverlay.setAttribute('aria-hidden','false');
+  setTimeout(() => authEmail.focus(),50);
+}
+
+function hideAuth(){
+  authOverlay.classList.remove('show');
+  authOverlay.setAttribute('aria-hidden','true');
+}
+
+function updateAuthWidget(user){
+  currentSpendflowUser = user || null;
+  const loggedIn = Boolean(user);
+
+  authWidget.classList.toggle(
+    'logged-in',
+    loggedIn
+  );
+  openAuthButton.classList.toggle(
+    'logged-in',
+    loggedIn
+  );
+  openAuthButton.textContent = loggedIn
+    ? user.email
+    : 'MASUK / DAFTAR';
+  openAuthButton.title = loggedIn
+    ? `Tersinkron sebagai ${user.email}`
+    : 'Masuk atau daftar akun';
+}
+
+function appStorageKeys(){
+  return [
+    INPUT_STORAGE_KEY,
+    HISTORY_STORAGE_KEY,
+    HISTORY_VISIBILITY_KEY,
+    DETAIL_VISIBILITY_KEY,
+    'spendflow-theme'
+  ];
+}
+
+function collectCloudData(){
+  const storage = {};
+
+  appStorageKeys().forEach(key => {
+    storage[key] = localStorage.getItem(key);
+  });
+
+  return {
+    version:1,
+    savedAt:new Date().toISOString(),
+    storage
+  };
+}
+
+function clearAppStorage(){
+  appStorageKeys().forEach(
+    key => localStorage.removeItem(key)
+  );
+  localStorage.removeItem(CLOUD_REVISION_KEY);
+}
+
+function applyCloudStorage(data){
+  if(!data?.storage){
+    return false;
+  }
+
+  applyingCloudData = true;
+
+  appStorageKeys().forEach(key => {
+    const value = data.storage[key];
+
+    if(typeof value === 'string'){
+      localStorage.setItem(key,value);
+    }
+    else{
+      localStorage.removeItem(key);
+    }
+  });
+
+  localStorage.setItem(
+    CLOUD_REVISION_KEY,
+    data.savedAt || new Date().toISOString()
+  );
+
+  applyingCloudData = false;
+  return true;
+}
+
+async function syncCloudNow(){
+  if(
+    !spendflowSupabase ||
+    !currentSpendflowUser ||
+    applyingCloudData
+  ){
+    return;
+  }
+
+  const data = collectCloudData();
+  const {error} = await spendflowSupabase
+    .from('spendflow_data')
+    .upsert(
+      {
+        user_id:currentSpendflowUser.id,
+        data,
+        updated_at:data.savedAt
+      },
+      {onConflict:'user_id'}
+    );
+
+  if(error){
+    autosaveStatus.textContent =
+      'CLOUD GAGAL';
+    console.error(error);
+    return;
+  }
+
+  localStorage.setItem(
+    CLOUD_REVISION_KEY,
+    data.savedAt
+  );
+  updateAutosaveStatus(
+    data.savedAt,
+    'CLOUD TERSIMPAN'
+  );
+}
+
+function scheduleCloudSync(delay = 700){
+  if(
+    applyingCloudData ||
+    !currentSpendflowUser
+  ){
+    return;
+  }
+
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(
+    syncCloudNow,
+    delay
+  );
+}
+
+async function loadCloudData(user){
+  const previousUser =
+    localStorage.getItem(LAST_USER_KEY);
+
+  if(previousUser && previousUser !== user.id){
+    clearAppStorage();
+  }
+
+  localStorage.setItem(LAST_USER_KEY,user.id);
+
+  const {data,error} = await spendflowSupabase
+    .from('spendflow_data')
+    .select('data,updated_at')
+    .eq('user_id',user.id)
+    .maybeSingle();
+
+  if(error){
+    setAuthMessage(
+      `Gagal membaca cloud: ${error.message}`,
+      'error'
+    );
+    showAuth();
+    return;
+  }
+
+  if(!data){
+    await syncCloudNow();
+    statusEl.textContent =
+      'Akun terhubung. Data perangkat disimpan ke cloud.';
+    return;
+  }
+
+  const remoteRevision =
+    data.data?.savedAt || data.updated_at || '';
+  const localRevision =
+    localStorage.getItem(CLOUD_REVISION_KEY) || '';
+
+  if(remoteRevision > localRevision){
+    applyCloudStorage(data.data);
+    location.reload();
+    return;
+  }
+
+  statusEl.textContent =
+    'Akun terhubung dan sinkronisasi cloud aktif.';
+}
+
+async function initializeSupabaseAuth(){
+  if(!LOGIN_ENABLED){
+    authWidget.hidden = true;
+    hideAuth();
+    localStorage.setItem(GUEST_MODE_KEY,'1');
+    return;
+  }
+
+  authWidget.hidden = false;
+
+  if(!spendflowSupabase){
+    statusEl.textContent =
+      'Supabase tidak dapat dimuat. Mode lokal tetap aktif.';
+    return;
+  }
+
+  const {data:{session}} =
+    await spendflowSupabase.auth.getSession();
+
+  updateAuthWidget(session?.user);
+
+  if(session?.user){
+    localStorage.removeItem(GUEST_MODE_KEY);
+    await loadCloudData(session.user);
+  }
+  else if(localStorage.getItem(GUEST_MODE_KEY) !== '1'){
+    showAuth();
+  }
+
+  spendflowSupabase.auth.onAuthStateChange(
+    (event,sessionValue) => {
+      updateAuthWidget(sessionValue?.user);
+
+      if(
+        event === 'SIGNED_IN' &&
+        sessionValue?.user
+      ){
+        localStorage.removeItem(GUEST_MODE_KEY);
+        hideAuth();
+        setTimeout(
+          () => loadCloudData(sessionValue.user),
+          0
+        );
+      }
+    }
+  );
+}
+
+openAuthButton.addEventListener(
+  'click',
+  () => {
+    if(currentSpendflowUser){
+      statusEl.textContent =
+        `Cloud aktif sebagai ${currentSpendflowUser.email}.`;
+      return;
+    }
+
+    showAuth();
+  }
+);
+
+authForm.addEventListener(
+  'submit',
+  async event => {
+    event.preventDefault();
+
+    if(!spendflowSupabase){
+      setAuthMessage(
+        'Koneksi Supabase tidak tersedia.',
+        'error'
+      );
+      return;
+    }
+
+    setAuthMessage('Memeriksa akun...');
+
+    const {error} =
+      await spendflowSupabase.auth
+        .signInWithPassword({
+          email:authEmail.value.trim(),
+          password:authPassword.value
+        });
+
+    if(error){
+      setAuthMessage(
+        'Email atau password tidak sesuai.',
+        'error'
+      );
+      return;
+    }
+
+    setAuthMessage(
+      'Login berhasil. Menyiapkan data cloud...',
+      'success'
+    );
+  }
+);
+
+$('authRegister').addEventListener(
+  'click',
+  async () => {
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+
+    if(!email || password.length < 6){
+      setAuthMessage(
+        'Isi email dan password minimal 6 karakter.',
+        'error'
+      );
+      return;
+    }
+
+    setAuthMessage('Membuat akun...');
+
+    const {data,error} =
+      await spendflowSupabase.auth.signUp({
+        email,
+        password,
+        options:{
+          emailRedirectTo:
+            location.origin + location.pathname
+        }
+      });
+
+    if(error){
+      setAuthMessage(error.message,'error');
+      return;
+    }
+
+    if(data.session){
+      setAuthMessage(
+        'Akun berhasil dibuat dan sudah masuk.',
+        'success'
+      );
+    }
+    else{
+      setAuthMessage(
+        'Akun dibuat. Periksa email untuk verifikasi, lalu masuk.',
+        'success'
+      );
+    }
+  }
+);
+
+$('continueGuest').addEventListener(
+  'click',
+  () => {
+    localStorage.setItem(GUEST_MODE_KEY,'1');
+    hideAuth();
+    statusEl.textContent =
+      'Mode tamu aktif. Data hanya tersimpan di perangkat ini.';
+  }
+);
+
+authLogoutButton.addEventListener(
+  'click',
+  async () => {
+    if(!confirm('Keluar dari akun SpendFlow?')){
+      return;
+    }
+
+    await syncCloudNow();
+    await spendflowSupabase.auth.signOut();
+    clearAppStorage();
+    localStorage.removeItem(LAST_USER_KEY);
+    localStorage.removeItem(GUEST_MODE_KEY);
+    location.reload();
+  }
+);
+
+authOverlay.addEventListener(
+  'click',
+  event => {
+    if(
+      event.target === authOverlay &&
+      (
+        currentSpendflowUser ||
+        localStorage.getItem(GUEST_MODE_KEY) === '1'
+      )
+    ){
+      hideAuth();
+    }
+  }
+);
 
 function updateAutosaveStatus(
   dateValue,
@@ -3453,6 +4112,7 @@ function saveInputDrafts(){
       );
       autosaveStatus.textContent =
         'AUTOSAVE SIAP';
+      scheduleCloudSync();
       return;
     }
 
@@ -3469,6 +4129,7 @@ function saveInputDrafts(){
     );
 
     updateAutosaveStatus(savedAt);
+    scheduleCloudSync();
   }
   catch(error){
     statusEl.textContent =
@@ -3574,6 +4235,7 @@ function writeHistory(items){
     HISTORY_STORAGE_KEY,
     JSON.stringify(items)
   );
+  scheduleCloudSync();
 }
 
 function renderHistory(){
@@ -3678,6 +4340,7 @@ function setTheme(mode){
       'spendflow-theme',
       mode
     );
+    scheduleCloudSync();
   }
   catch(error){}
 }
@@ -5003,6 +5666,7 @@ function setDetailsHidden(hidden){
     DETAIL_VISIBILITY_KEY,
     hidden ? '1' : '0'
   );
+  scheduleCloudSync();
 }
 
 setDetailsHidden(
@@ -5117,6 +5781,7 @@ $('clearHistory').addEventListener(
     localStorage.removeItem(
       HISTORY_STORAGE_KEY
     );
+    scheduleCloudSync();
 
     renderHistory();
 
@@ -5170,6 +5835,7 @@ function setHistoryHidden(hidden){
     HISTORY_VISIBILITY_KEY,
     hidden ? '1' : '0'
   );
+  scheduleCloudSync();
 }
 
 setHistoryHidden(
@@ -5211,6 +5877,7 @@ $('reset').addEventListener(
     localStorage.removeItem(
       INPUT_STORAGE_KEY
     );
+    scheduleCloudSync();
     autosaveStatus.textContent =
       'AUTOSAVE SIAP';
 
@@ -5276,6 +5943,12 @@ document.addEventListener(
 if(restoredInputDrafts){
   calculate();
 }
+
+initializeSupabaseAuth().catch(error => {
+  console.error(error);
+  statusEl.textContent =
+    'Login cloud gagal dimuat. Mode lokal tetap dapat digunakan.';
+});
 </script>
 
 </body>
