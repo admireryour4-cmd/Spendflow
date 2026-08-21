@@ -2,7 +2,10 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
+>
 
 <title>SpendFlow &#8212; Hitung Spend Per Jam</title>
 
@@ -29,6 +32,7 @@ html,
 body{
   margin:0;
   max-width:100%;
+  touch-action:pan-x pan-y;
 }
 
 body{
@@ -2848,6 +2852,105 @@ tbody tr:hover{
   }
 }
 
+@media(max-width:760px){
+  textarea,
+  input,
+  select{
+    font-size:16px !important;
+  }
+}
+
+/* TAMPILAN PONSEL SAAT DIPUTAR HORIZONTAL */
+@media(
+  orientation:landscape
+) and (
+  max-height:600px
+) and (
+  pointer:coarse
+){
+  .shell{
+    display:block;
+  }
+
+  aside{
+    position:relative;
+    width:100%;
+    height:auto;
+    min-height:128px;
+    padding:16px 20px;
+    border-right:0;
+    border-bottom:1px solid rgba(255,255,255,.1);
+  }
+
+  .logo{
+    font-size:19px;
+  }
+
+  .side-title{
+    max-width:calc(100% - 145px);
+    margin:17px 0 0;
+  }
+
+  .side-title h1{
+    margin:0;
+    font-size:25px;
+    line-height:1;
+  }
+
+  .privacy{
+    display:none;
+  }
+
+  .gojo-gif{
+    width:70px;
+    right:30px;
+    bottom:2px;
+  }
+
+  .pixel-shadow{
+    right:27px;
+    bottom:1px;
+  }
+
+  main{
+    padding:14px 14px 34px;
+  }
+
+  header{
+    align-items:center;
+    margin-bottom:14px;
+  }
+
+  .workspace{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+  }
+
+  textarea{
+    height:210px;
+  }
+
+  .summary{
+    grid-template-columns:minmax(210px,.75fr) minmax(390px,1.25fr);
+  }
+
+  .status-grid{
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:5px;
+  }
+
+  .status-grid .status-active,
+  .status-grid .status-scheduled,
+  .status-grid .status-review,
+  .status-grid .status-off,
+  .status-grid .status-disabled{
+    min-height:62px;
+    grid-column:auto;
+    margin:0;
+    padding:9px 8px !important;
+  }
+}
+
 </style>
 </head>
 
@@ -3042,7 +3145,7 @@ tbody tr:hover{
     <div class="toolbar">
 
       <div class="status" id="status">
-            *PERHATIKAN
+            *PERHATIKAN TANDA DAN WARNA.
       </div>
 
       <div class="autosave-status" id="autosaveStatus">
@@ -5135,6 +5238,39 @@ $('reset').addEventListener(
     statusEl.textContent =
       'Semua data telah dibersihkan.';
   }
+);
+
+/* KUNCI ZOOM KHUSUS PERANGKAT SENTUH */
+document.addEventListener(
+  'gesturestart',
+  event => event.preventDefault(),
+  {passive:false}
+);
+
+document.addEventListener(
+  'touchmove',
+  event => {
+    if(event.touches.length > 1){
+      event.preventDefault();
+    }
+  },
+  {passive:false}
+);
+
+let lastTouchEnd = 0;
+
+document.addEventListener(
+  'touchend',
+  event => {
+    const now = Date.now();
+
+    if(now - lastTouchEnd <= 300){
+      event.preventDefault();
+    }
+
+    lastTouchEnd = now;
+  },
+  {passive:false}
 );
 
 if(restoredInputDrafts){
